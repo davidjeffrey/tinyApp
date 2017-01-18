@@ -34,6 +34,12 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+app.post("/urls/:id/delete", (req, res) => {
+  let shortURL = req.params.id;
+  delete urlDatabase[shortURL]
+  res.redirect("/urls")
+})
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -61,9 +67,17 @@ app.get("/hello", (req, res) => {
 app.post("/urls", (req, res) => {
   let longURL = req.body;
   let shortURL = generateRandomString()
-  console.log(longURL);
   urlDatabase[shortURL] = longURL.longURL;
-  console.log(urlDatabase)
-  res.redirect(`http://localhost:8080/urls/${shortURL}`)
+  res.redirect("/urls")
 });
 
+app.post("/urls/:id/update", (req, res) => {
+  let shortURL = req.params.id;
+  let newLongURL = req.body.oldLongURL;
+  urlDatabase[shortURL] = newLongURL;
+  res.redirect("/urls")
+});
+
+app.use(function (req, res) {
+  res.end("Error 404! Page not found")
+});

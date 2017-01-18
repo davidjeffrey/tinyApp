@@ -1,14 +1,17 @@
+function generateRandomString() {
+  let text = "";
+  let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
+  for (let i=0; i < 6; i++)
+      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  return text;
+}
 
-var urlDatabase = {
+console.log(generateRandomString())
+
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
-let req = "/u/b2xVn2"
-
-req = req.replace("/u/", "");
-
-longURL = urlDatabase[req]
-
-console.log(longURL)
+console.log(urlDatabase.key)
