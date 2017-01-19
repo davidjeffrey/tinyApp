@@ -2,6 +2,8 @@ var express = require("express");
 var app = express();
 var PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
+var cookieParser = require('cookie-parser')
+
 
 function generateRandomString() {
   let text = "";
@@ -18,6 +20,8 @@ app.use(express.static('public'))
 
 app.set("view engine", "ejs")
 
+app.use(cookieParser())
+
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -28,21 +32,26 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies.username
+  }
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls/:id/delete", (req, res) => {
-  let shortURL = req.params.id;
-  delete urlDatabase[shortURL]
-  res.redirect("/urls")
-})
-
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies.username
+  }
+  res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies.username
+  }
   shortURL = req.url.replace("/u/", "");
   longURL = urlDatabase[shortURL]
   if (longURL == undefined) {
@@ -51,15 +60,23 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { shortURL: req.params.id, longURL: urlDatabase[req.params.id]};
+  let templateVars = {
+    shortURL: req.params.id,
+    longURL: urlDatabase[req.params.id],
+    username: req.cookies.username
+  };
   res.render("urls_show", templateVars);
 });
 
-
 app.get("/hello", (req, res) => {
   res.end("<html><body>Hello <b>World</b></body></html>\n");
+});
+
+app.post("/urls/:id/delete", (req, res) => {
+  let shortURL = req.params.id;
+  delete urlDatabase[shortURL]
+  res.redirect("/urls")
 });
 
 app.post("/urls", (req, res) => {
@@ -73,6 +90,13 @@ app.post("/urls/:id/update", (req, res) => {
   let shortURL = req.params.id;
   let newLongURL = req.body.oldLongURL;
   urlDatabase[shortURL] = newLongURL;
+  res.redirect("/urls");
+});
+
+app.post("/login", (req, res) => {
+  let username = req.body.username
+  res.cookie("username", username)
+
   res.redirect("/urls");
 });
 

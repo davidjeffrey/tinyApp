@@ -1,1 +1,10 @@
-<header></header>
+<header>
+<% if (username == undefined) { %>
+<form method="POST" action="/login">
+  <input id="login" type="text" name="username">
+  <input type="submit" value="Login">
+</form>
+ <% } else { %>
+  <p><%= username %></p>
+ <% } %>
+</header>
