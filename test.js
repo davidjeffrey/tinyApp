@@ -14,4 +14,4 @@ let urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-console.log(urlDatabase.key)
+console.log(urlDatabase)

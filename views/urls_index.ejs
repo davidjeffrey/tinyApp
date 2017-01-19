@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><title>TinyApp</title></head>
-<body style="font-size:20px; padding:50px;">
-<header><% include ./partials/_header %></header>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Rancho&effect=fire-animation" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./css/style.css" />
+</head>
+<body class="all">
+<% include ./partials/_header %>
+<% include ./partials/_nav %>
 
-<ul>
 <% for(key in urls) { %>
-  <li>
+  <p>
     <%= key %>: <%= urls[key] %>
       <form method="POST" action="/urls/<%=key%>/delete">
         <input type="submit" value="Delete">
@@ -14,9 +18,9 @@
       <form method="GET" action="/urls/<%=key%>">
         <input type="submit" value="Update">
       </form>
-  </li>
+  </p>
 <% } %>
-</ul>
+
 
 <a href="urls/new"> Shorten a new URL </a>
 

@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
-<head><title>TinyApp</title></head>
-<body style="font-size:20px; padding:50px;">
-<header><% include ./partials/_header %></header>
-<p>
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Rancho&effect=fire-animation" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./../css/style.css" />
+</head>
+<body class="all">
+<% include ./partials/_header %>
+<% include ./partials/_nav %>
+
 <h3>ShortURL : <%= shortURL%></h3>
-</p>
     <form action="/urls/<%= shortURL%>/update" method="POST">
       <input id="oldLongURL" type="text" name="oldLongURL" placeholder="<%= longURL%>" style="width: 300px">
       <input type="submit" value="Update">

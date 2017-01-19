@@ -1,8 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head><title>TinyApp</title></head>
-  <header><% include ./partials/_header %></header>
-  <body style="font-size:20px; padding:50px;">
+<html>
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Rancho&effect=fire-animation" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="./../css/style.css" />
+</head>
+<body class="all">
+<% include ./partials/_header %>
+<% include ./partials/_nav %>
     <form action="/urls" method="POST">
       <label for="longURL">Enter a URL:</label>
       <input id="longURL" type="text" name="longURL" placeholder="http://">

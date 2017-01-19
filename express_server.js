@@ -14,6 +14,8 @@ function generateRandomString() {
 
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.use(express.static('public'))
+
 app.set("view engine", "ejs")
 
 let urlDatabase = {
@@ -21,12 +23,8 @@ let urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-app.get("/", (req, res) => {
-  res.end("Hello!");
-});
-
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`TinyApp is listening on port ${PORT}!`);
 });
 
 app.get("/urls", (req, res) => {
@@ -66,16 +64,16 @@ app.get("/hello", (req, res) => {
 
 app.post("/urls", (req, res) => {
   let longURL = req.body;
-  let shortURL = generateRandomString()
+  let shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL.longURL;
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/update", (req, res) => {
   let shortURL = req.params.id;
   let newLongURL = req.body.oldLongURL;
   urlDatabase[shortURL] = newLongURL;
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.use(function (req, res) {
