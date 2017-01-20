@@ -1,19 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <link href="https://fonts.googleapis.com/css?family=Rancho&effect=fire-animation" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="./../css/style.css" />
-</head>
-<body class= "font-effect-fire-animation">
-<% include ./partials/_header %>
-<% include ./partials/_nav %>
-
-<h3>ShortURL : <%= shortURL%></h3>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Rancho&effect=fire-animation" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Righteous" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="./../css/style.css" />
+  </head>
+  <body class= "font-effect-fire-animation">
+    <% include ./partials/_header %>
+    <h3>ShortURL : <%= shortURL%></h3>
     <form action="/urls/<%= shortURL%>/update" method="POST">
       <input id="oldLongURL" type="text" name="oldLongURL" placeholder="<%= longURL%>" style="width: 300px">
       <input type="submit" value="Update">
     </form>
-
-</body>
+  </body>
 </html>

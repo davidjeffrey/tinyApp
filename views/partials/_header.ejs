@@ -1,10 +1,9 @@
 <header>
-<% if (username == undefined) { %>
-<form method="POST" action="/login">
-  <input id="login" type="text" name="username">
-  <input type="submit" value="Login">
-</form>
- <% } else { %>
-  <p><%= username %></p>
- <% } %>
+<% if (userId === undefined) { %>
+<a href="/register">Register</a>
+<a href="/login">Login</a>
+<% } else { %>
+<p><%= email %></p>
+<% } %>
+<h1 class= "font-effect-fire-animation">TinyApp</h1>
 </header>
