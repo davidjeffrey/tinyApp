@@ -7,9 +7,9 @@
 </head>
 <body class= "font-effect-fire-animation">
 <% include ./partials/_header %>
-<% for(key in userInfo) { %>
+<% for(key in urls) { %>
   <p>
-    <%= userId %>: <%= userInfo[userId] %>
+    <%= key %>: <%= urls[key] %>
       <form method="POST" action="/urls/<%=key%>/delete">
         <input type="submit" value="Delete">
       </form>

@@ -1,8 +1,9 @@
-var express = require("express");
-var app = express();
-var PORT = process.env.PORT || 8080; // default port 8080
+const express = require("express");
+const app = express();
+const PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
-var cookieParser = require('cookie-parser')
+const cookieSession = require('cookie-session')
+const bcrypt = require('bcrypt');
 
 
 function generateRandomString() {
@@ -14,18 +15,30 @@ function generateRandomString() {
   return text;
 }
 
+function finder (shortURL) {
+  for (user in users) {
+    if(!users.hasOwnProperty(user)) continue;
+    for (link in users[user]["urlDatabase"]) {
+      if (link === shortURL) {
+        return users[user]["urlDatabase"][link]
+      }
+    }
+  }
+}
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.use(express.static('public'))
 
 app.set("view engine", "ejs")
 
-app.use(cookieParser())
+app.use(cookieSession({
+  name: 'session',
+  keys: ["doug"],
 
-let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 
 let users = {
   "userid": {
@@ -39,57 +52,50 @@ let users = {
   }
 };
 
-console.log(users.userid.sUrls)
-
 app.listen(PORT, () => {
   console.log(`TinyApp is listening on port ${PORT}!`);
 });
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlDatabase,
-    userId: req.cookies.userId,
-    userInfo: users[req.cookies.userId].urlDatabase
+    userId: req.session.user_id
   }
   if (templateVars.userId) {
-    templateVars.email = users[req.cookies.userId].email
+    templateVars.email = users[req.session.user_id].email;
+    templateVars.urls =  users[req.session.user_id].urlDatabase;
+  } else {
+    res.end("Error 404 Not Signed in")
   }
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    urls: urlDatabase,
-    userId: req.cookies.userId,
+    userId: req.session.user_id,
+    longURL: req.body.longURL
   }
   if (templateVars.userId) {
-    templateVars.email = users[req.cookies.userId].email
+    templateVars.email = users[req.session.user_id].email
   }
   res.render("urls_new", templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  let templateVars = {
-    urls: urlDatabase,
-    userId: req.cookies.userId,
+  if (finder(req.url.replace("/u/", "")) == undefined) {
+    return res.end("Error, could not find that tinyURL!");
+  } else {
+  return res.redirect(finder(req.url.replace("/u/", "")));
   }
-  if (templateVars.userId) {
-    templateVars.email = users[req.cookies.userId].email
-  }
-  if (urlDatabase[req.url.replace("/u/", "")] == undefined) {
-    res.end("Error, could not find that tinyURL!");
-  }
-  res.redirect(urlDatabase[req.url.replace("/u/", "")]);
 });
 
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    userId: req.cookies.userId,
+    userId: req.session.user_id,
   }
   if (templateVars.userId) {
-    templateVars.email = users[req.cookies.userId].email
+    templateVars.email = users[req.session.user_id].email
+    templateVars.longURL = users[req.session.user_id].urlDatabase[req.params.id]
   }
   res.render("urls_show", templateVars);
 });
@@ -106,6 +112,10 @@ app.get("/hello", (req, res) => {
   res.end("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+app.get("/", (req, res) => {
+  res.render("login")
+});
+
 app.post("/register", (req, res) => {
   for (user in users) {
     if (req.body.email === users[user].email || req.body.password.length < 1 || req.body.email.length < 1) {
@@ -117,26 +127,28 @@ app.post("/register", (req, res) => {
   users[id] = {
     "id": id,
     "email": req.body.email,
-    "password": req.body.password
+    "password": bcrypt.hashSync(req.body.password, 10),
+    "urlDatabase": {
+    }
   }
-  res.cookie("userId", id)
+  req.session.user_id = (id)
   res.redirect("/urls");
 });
 
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id]
+  delete users[req.session.user_id].urlDatabase[req.params.id]
   res.redirect("/urls")
 });
 
 app.post("/urls/:id/update", (req, res) => {
-  urlDatabase[req.params.id] = req.body.oldLongURL;
+  users[req.session.user_id].urlDatabase[req.params.id] = req.body.oldLongURL;
   res.redirect("/urls");
 });
 
 app.post("/login", (req, res) => {
   for (user in users) {
-    if (req.body.email === users[user].email && req.body.password === users[user].password) {
-      res.cookie("userId", users[user].id)
+    if (req.body.email === users[user].email && bcrypt.compareSync(req.body.password, users[user].password)) {
+      req.session.user_id = (users[user].id)
       res.redirect("/urls")
     }
   }
@@ -145,8 +157,8 @@ app.post("/login", (req, res) => {
 
 app.post("/urls", (req, res) => {
   for (user in users) {
-    if (req.cookies.userId === users[user].id) {
-      urlDatabase[generateRandomString()] = req.body.longURL;
+    if (req.session.user_id === users[user].id) {
+      users[req.session.user_id].urlDatabase[generateRandomString()] = req.body.longURL;
       res.redirect("/urls");
       return;
     }

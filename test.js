@@ -9,34 +9,38 @@ function generateRandomString() {
 
 id = generateRandomString()
 
-let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-
-let users = {
-  "userid": {
-    "id":"userid",
-    "email": "useremail",
-    "password": "userpassword"
-  }
-};
-
-console.log(users.userid.email)
-
 // users["id1"] = {
 //   "id": id,
 //   "password": "secret",
 //   "email": "gg"
 // }
 
- for (var user in users) {
-
-    if (users[user].email == "useremail") {
-      console.log("success")
+let users = {
+  "userid": {
+    "id":"userid",
+    "email": "useremail",
+    "password": "userpassword",
+    "urlDatabase": {
+      "b2xVn2": "http://www.lighthouselabs.ca",
+      "9sm5xK": "http://www.google.com"
     }
-    else {
-      console.log("fail")
+  }
+};
+
+let p = function (shortURL) {
+  for (user in users) {
+    if(!users.hasOwnProperty(user)) continue;
+    for (link in users[user]["urlDatabase"]) {
+      if (link === shortURL) {
+        console.log(users[user]["urlDatabase"][link])
       }
-    }
 
+      // if (user.urlDatabase[shortURL]) {
+      //   console.log("here")
+      // }
+    }
+  }
+}
+
+
+p("b2xVn2")
