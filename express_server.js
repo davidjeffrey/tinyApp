@@ -10,8 +10,9 @@ function generateRandomString() {
   let text = "";
   let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-  for (let i=0; i < 6; i++)
-      text += possible.charAt(Math.floor(Math.random() * possible.length));
+  for (let i=0; i < 6; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
   return text;
 }
 
@@ -57,63 +58,101 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls", (req, res) => {
+  if (req.session.user_id) {
   let templateVars = {
-    userId: req.session.user_id
+    userId: req.session.user_id,
+    email: users[req.session.user_id].email,
+    urls: users[req.session.user_id].urlDatabase
   }
-  if (templateVars.userId) {
-    templateVars.email = users[req.session.user_id].email;
-    templateVars.urls =  users[req.session.user_id].urlDatabase;
+  res.status(200);
+  res.render("urls_index", templateVars)
   } else {
-    res.end("Error 404 Not Signed in")
+      res.status(401)
+      res.end(`<p> Error 401: You must log in to view this page <a href="/login">Login</a></p>`);
+      return;
   }
-  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
+  if (req.session.user_id) {
   let templateVars = {
     userId: req.session.user_id,
-    longURL: req.body.longURL
+    email: users[req.session.user_id].email,
+    urls: users[req.session.user_id].urlDatabase
   }
-  if (templateVars.userId) {
-    templateVars.email = users[req.session.user_id].email
-  }
+  res.status(200);
   res.render("urls_new", templateVars);
+  } else {
+      res.status(401)
+      res.end(`<p> Error 401: You must log in to view this page <a href="./../login">Login</a></p>`);
+      return;
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
   if (finder(req.url.replace("/u/", "")) == undefined) {
     return res.end("Error, could not find that tinyURL!");
   } else {
-  return res.redirect(finder(req.url.replace("/u/", "")));
-  }
+      res.status(200);
+      return res.redirect(finder(req.url.replace("/u/", "")));
+    }
 });
 
 app.get("/urls/:id", (req, res) => {
+  if (req.session.user_id) {
+  if (finder(req.params.id) == undefined) {
+    res.status(404)
+    res.end(`<p> Error 404: Could not find that tinyURL! <a href="./../urls">Home</a></p>`);
+    return;
+  }
+  if (users[req.session.user_id].urlDatabase[req.params.id] == undefined) {
+    res.status(403)
+    res.end(`<p> Error 403: You can't edit that url silly! <a href="./../urls">Home</a></p>`);
+    return;
+  }
   let templateVars = {
     shortURL: req.params.id,
     userId: req.session.user_id,
+    email: users[req.session.user_id].email,
+    longURL: users[req.session.user_id].urlDatabase[req.params.id]
   }
-  if (templateVars.userId) {
-    templateVars.email = users[req.session.user_id].email
-    templateVars.longURL = users[req.session.user_id].urlDatabase[req.params.id]
-  }
+  res.status(200);
   res.render("urls_show", templateVars);
+  } else {
+      res.status(401)
+      res.end(`<p> Error 401: You must log in to view this page <a href="login">Login</a></p>`);
+      return;
+    }
 });
 
 app.get("/register", (req, res) => {
+  res.status(200);
   res.render("register");
 });
 
 app.get("/login", (req, res) => {
+  res.status(200);
   res.render("login");
 });
 
 app.get("/hello", (req, res) => {
+  res.status(200);
   res.end("<html><body>Hello <b>World</b></body></html>\n");
 });
 
 app.get("/", (req, res) => {
-  res.render("login")
+  res.status(200);
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login")
+  }
+});
+
+app.get("/logout", (req, res) => {
+  res.status(200);
+  req.session = null
+  res.redirect("login")
 });
 
 app.post("/register", (req, res) => {
