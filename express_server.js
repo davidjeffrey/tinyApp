@@ -1,8 +1,8 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 8080; // default port 8080
+const PORT = process.env.PORT || 8080;
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 
@@ -14,32 +14,30 @@ function generateRandomString() {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
   return text;
-}
+};
 
 function finder (shortURL) {
   for (user in users) {
     if(!users.hasOwnProperty(user)) continue;
     for (link in users[user]["urlDatabase"]) {
       if (link === shortURL) {
-        return users[user]["urlDatabase"][link]
+        return users[user]["urlDatabase"][link];
       }
     }
   }
-}
+};
 
 app.use(bodyParser.urlencoded({extended: true}));
 
-app.use(express.static('public'))
+app.use(express.static('public'));
 
-app.set("view engine", "ejs")
+app.set("view engine", "ejs");
 
 app.use(cookieSession({
   name: 'session',
   keys: ["doug"],
-
-  // Cookie Options
-  maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+  maxAge: 24 * 60 * 60 * 1000
+}));
 
 let users = {
   "userid": {
@@ -58,23 +56,23 @@ app.listen(PORT, () => {
 });
 
 app.get("/urls", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
   let templateVars = {
     userId: req.session.user_id,
     email: users[req.session.user_id].email,
     urls: users[req.session.user_id].urlDatabase
   }
   res.status(200);
-  res.render("urls_index", templateVars)
+  res.render("urls_index", templateVars);
   } else {
-      res.status(401)
+      res.status(401);
       res.end(`<p> Error 401: You must log in to view this page <a href="/login">Login</a></p>`);
       return;
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
   let templateVars = {
     userId: req.session.user_id,
     email: users[req.session.user_id].email,
@@ -83,7 +81,7 @@ app.get("/urls/new", (req, res) => {
   res.status(200);
   res.render("urls_new", templateVars);
   } else {
-      res.status(401)
+      res.status(401);
       res.end(`<p> Error 401: You must log in to view this page <a href="./../login">Login</a></p>`);
       return;
   }
@@ -99,14 +97,14 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/urls/:id", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
   if (finder(req.params.id) == undefined) {
-    res.status(404)
+    res.status(404);
     res.end(`<p> Error 404: Could not find that tinyURL! <a href="./../urls">Home</a></p>`);
     return;
   }
   if (users[req.session.user_id].urlDatabase[req.params.id] == undefined) {
-    res.status(403)
+    res.status(403);
     res.end(`<p> Error 403: You can't edit that url silly! <a href="./../urls">Home</a></p>`);
     return;
   }
@@ -119,7 +117,7 @@ app.get("/urls/:id", (req, res) => {
   res.status(200);
   res.render("urls_show", templateVars);
   } else {
-      res.status(401)
+      res.status(401);
       res.end(`<p> Error 401: You must log in to view this page <a href="login">Login</a></p>`);
       return;
     }
@@ -142,7 +140,7 @@ app.get("/hello", (req, res) => {
 
 app.get("/", (req, res) => {
   res.status(200);
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     res.redirect("/urls");
   } else {
     res.redirect("/login")
@@ -151,18 +149,19 @@ app.get("/", (req, res) => {
 
 app.get("/logout", (req, res) => {
   res.status(200);
-  req.session = null
-  res.redirect("login")
+  req.session = null;
+  res.redirect("login");
 });
 
 app.post("/register", (req, res) => {
   for (user in users) {
     if (req.body.email === users[user].email || req.body.password.length < 1 || req.body.email.length < 1) {
-      res.end("Error Will Robinson!!! 404")
+      res.status(404);
+      res.end(`<p> Error Will Robinson!!! User name already exists <a href="register">Login</a></p>`);
       return;
     }
   }
-  let id = generateRandomString()
+  let id = generateRandomString();
   users[id] = {
     "id": id,
     "email": req.body.email,
@@ -176,7 +175,7 @@ app.post("/register", (req, res) => {
 
 app.post("/urls/:id/delete", (req, res) => {
   delete users[req.session.user_id].urlDatabase[req.params.id]
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 app.post("/urls/:id/update", (req, res) => {
@@ -187,11 +186,12 @@ app.post("/urls/:id/update", (req, res) => {
 app.post("/login", (req, res) => {
   for (user in users) {
     if (req.body.email === users[user].email && bcrypt.compareSync(req.body.password, users[user].password)) {
-      req.session.user_id = (users[user].id)
-      res.redirect("/urls")
+      req.session.user_id = (users[user].id);
+      res.redirect("/urls");
     }
   }
-  res.end("Wrong user name or password")
+  res.status(404);
+  res.end(`<p>Wrong user name or password <a href="login">Login</a></p>`);
 });
 
 app.post("/urls", (req, res) => {
@@ -202,9 +202,9 @@ app.post("/urls", (req, res) => {
       return;
     }
   }
-  res.redirect("login")
+  res.redirect("login");
 });
 
 app.use(function (req, res) {
-  res.end("Error 404! Page not found")
+  res.end("Error 404! Page not found");
 });
