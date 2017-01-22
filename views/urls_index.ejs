@@ -9,7 +9,7 @@
 <% include ./partials/_header %>
 <% for(key in urls) { %>
   <p>
-    <%= key %>: <%= urls[key] %>
+    <%= key %>: <a href="<%= urls[key] %>"><%= urls[key] %></a>
       <form method="POST" action="/urls/<%=key%>/delete">
         <input type="submit" value="Delete">
       </form>

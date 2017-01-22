@@ -62,8 +62,7 @@ app.get("/urls", (req, res) => {
     email: users[req.session.user_id].email,
     urls: users[req.session.user_id].urlDatabase
   }
-  res.status(200);
-  res.render("urls_index", templateVars);
+  res.status(200).render("urls_index", templateVars);
   } else {
       res.status(401);
       res.end(`<p> Error 401: You must log in to view this page <a href="/login">Login</a></p>`);
